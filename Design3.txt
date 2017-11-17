@@ -1,0 +1,63 @@
+/*
+Erik Olson
+ECE 3740
+Design 3
+03/28/2017
+The purpose of this project was to create a machine to average 
+4bit binary values. After 8 falling edge clocks, 
+the average is taken on the condition if ADD is 
+asserted, if it's deasserted in the middle of the operation
+then the operation will finish calculating the average and 
+then discontinue operation
+*/
+module Design3(z, AVE, clk);
+output reg [3:0] z; 		//Initialization of registers/inputs/variables
+reg ADD;						//If ADD is asserted then begins operation, if 
+								//deasserted finishes operation and gets average
+								//	and stops operation
+input clk;
+reg x [3:0];
+integer cnt = 0;
+output reg [3:0] AVE;						
+reg [3:0] NUM;
+reg [6:0] total = 0;
+
+
+always @ (negedge clk)		   //When negative edge on clk occurs execute
+										//the following
+begin
+	if(ADD == 1 && cnt < 8)		//In the case that ADD is asserted, 
+										//and cnt is less than 
+									   //8 then operation begins and 		
+										//continues until cnt reaches 8
+	begin
+	total = total + NUM;			//Set register value to current 			
+										//value and add available 	
+										//bus value to it.
+	cnt = cnt + 1;					//Increment integer count each time to
+									   //keep track of 
+										//how many neg falling edge occured
+		if(cnt == 8)				//If cnt value is 8, then operation for 
+										//current set of numbers is complete					
+		begin
+		AVE = total / (cnt);		//Find the average by dividing total 
+										//value in total register by 
+										//cnt (we can use cnt because it's 
+										//the amount of bus values that were made available)
+		cnt = 0;						//Reset cnt to 0 and continue operation until 
+										//ADD is deasserted
+		total = 0;					//Total register is reset
+		end
+    end
+	else if(ADD == 0 && (cnt < 8 && cnt > 0))  //In the case that ADD is 
+															 //deasserted in the middle
+															 //of the operation and cnt 
+															 //is between 1 and 7.
+	begin 
+	AVE = total / (cnt);			//ADD is deasserted and average is calculated
+	cnt = 0;						   //cnt is reset and operations discontinues 
+										//until ADD is asserted
+	total = 0;  					//Total register is reset
+	end  
+end
+endmodule
